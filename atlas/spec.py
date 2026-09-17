@@ -38,3 +38,16 @@ class Spec:
 
     def get(self,node_id: str) -> SpecNode:
         return next((n for n in self.nodes if n.id == node_id),None)
+
+    def roots(self) -> list[SpecNode]:
+        """Nodes with no dependencies — valid starting points."""
+        return [n for n in self.nodes if not n.depends_on]
+
+    def ready_nodes(self,completed_ids: set[str]) -> list[SpecNode]:
+        """Nodes whose dependencies are all completed, but that aren't themselves done yet."""
+        return [
+            n
+            for n in self.nodes
+            if n.id not in completed_ids
+            and all(dep in completed_ids for dep in n.depends_on)
+        ]
