@@ -26,3 +26,19 @@ def test_is_git_repo_false_outside_repo(tmp_path: Path):
 def test_is_git_repo_true_inside_repo(tmp_path: Path):
     _init_repo(tmp_path)
     assert is_git_repo(tmp_path)
+
+def test_current_commit_returns_a_hash(tmp_path: Path):
+    _init_repo(tmp_path)
+    (tmp_path / "a.txt").write_text("hello")
+    _run(["add", "a.txt"], cwd=tmp_path)
+    _run(["commit", "-m", "first commit"], cwd=tmp_path)
+
+    commit_hash = current_commit(tmp_path)
+    assert len(commit_hash) == 40
+    assert all(c in "0123456789abcdef" for c in commit_hash)
+
+
+def test_current_commit_raises_when_no_commits_yet(tmp_path: Path):
+    _init_repo(tmp_path)
+    with pytest.raises(GitError):
+        current_commit(tmp_path)
