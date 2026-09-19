@@ -33,3 +33,10 @@ def _topological_order(spec: Spec) -> list[SpecNode]:
         visit(node)
 
     return order
+
+def _status_marker(node: SpecNode, state: State) -> str:
+    if state.is_done(node.id):
+        return "+"
+    if all(state.is_done(dep) for dep in node.depends_on):
+        return "-"
+    return " "
