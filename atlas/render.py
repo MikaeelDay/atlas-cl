@@ -40,3 +40,15 @@ def _status_marker(node: SpecNode, state: State) -> str:
     if all(state.is_done(dep) for dep in node.depends_on):
         return "-"
     return " "
+
+def render_mermaid(spec: Spec, state: State) -> str:
+    lines = ["```mermaid", "flowchart TD"]
+    for node in spec.nodes:
+        marker = _status_marker(node, state)
+        label = f"[{marker}] {node.name}".replace('"', "'")
+        lines.append(f'    {node.id}["{label}"]')
+    for node in spec.nodes:
+        for dep_id in node.depends_on:
+            lines.append(f"    {dep_id} --> {node.id}")
+    lines.append("```")
+    return "\n".join(lines)
