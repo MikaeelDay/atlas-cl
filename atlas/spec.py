@@ -17,8 +17,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
-from tensorflow.tools.pip_package.setup import project_name
-from torch.xpu import graph
 
 
 class SpecError(Exception):
@@ -30,10 +28,8 @@ class SpecNode:
     id: str
     name: str
     description: str = ""
-    path: list[str] = field(default_factory=list)
+    paths: list[str] = field(default_factory=list)
     depends_on: list[str] = field(default_factory=list)
-
-
 
 
 @dataclass
@@ -41,14 +37,14 @@ class Spec:
     project_name: str
     nodes: list[SpecNode] = field(default_factory=list)
 
-    def get(self,node_id: str) -> SpecNode:
-        return next((n for n in self.nodes if n.id == node_id),None)
+    def get(self, node_id: str) -> SpecNode | None:
+        return next((n for n in self.nodes if n.id == node_id), None)
 
     def roots(self) -> list[SpecNode]:
         """Nodes with no dependencies — valid starting points."""
         return [n for n in self.nodes if not n.depends_on]
 
-    def ready_nodes(self,completed_ids: set[str]) -> list[SpecNode]:
+    def ready_nodes(self, completed_ids: set[str]) -> list[SpecNode]:
         """Nodes whose dependencies are all completed, but that aren't themselves done yet."""
         return [
             n
@@ -59,10 +55,9 @@ class Spec:
 
     def validate(self) -> None:
         ids = [n.id for n in self.nodes]
-        dupes = {i for i in ids if ids.count(i)>1}
+        dupes = {i for i in ids if ids.count(i) > 1}
         if dupes:
-            raise SpecError(f"Duplicate specs ids: {sorted(dupes)}")
-
+            raise SpecError(f"Duplicate section ids: {sorted(dupes)}")
         id_set = set(ids)
         for n in self.nodes:
             unknown = [d for d in n.depends_on if d not in id_set]
@@ -74,8 +69,8 @@ class Spec:
 
 
 def _check_no_cycles(nodes: list[SpecNode]) -> None:
-    graph = {n for n in nodes}
-    WHITE, GRAY, BLACK = 0,1,2
+    graph = {n.id: n.depends_on for n in nodes}
+    WHITE, GRAY, BLACK = 0, 1, 2
     color = {n_id: WHITE for n_id in graph}
 
     def visit(node_id: str, stack: list[str]) -> None:
@@ -101,10 +96,11 @@ def load_spec(path: Path) -> Spec:
     except yaml.YAMLError as e:
         raise SpecError(f"Could not parse YAML in {path}: {e}") from e
 
-    project_name = raw.get("project_name","")
-    nodes_raw = raw.get("sections",[])
-    if not isinstance(nodes_raw,list):
+    project_name = raw.get("project_name", "")
+    nodes_raw = raw.get("sections", [])
+    if not isinstance(nodes_raw, list):
         raise SpecError("'sections' must be a list")
+
     nodes = []
     for i, n in enumerate(nodes_raw):
         if "id" not in n or "name" not in n:
@@ -122,6 +118,7 @@ def load_spec(path: Path) -> Spec:
     spec = Spec(project_name=project_name, nodes=nodes)
     spec.validate()
     return spec
+
 
 def save_spec(spec: Spec, path: Path) -> None:
     data = {

@@ -1,0 +1,15 @@
+project_name: my-shop
+sections:
+- id: db
+  name: Database Schema
+  description: ''
+  paths:
+  - db/**
+  depends_on: []
+- id: auth
+  name: User Auth
+  description: ''
+  paths:
+  - auth/**
+  depends_on:
+  - db
