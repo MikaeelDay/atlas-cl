@@ -55,7 +55,7 @@ def changed_files_in_working_tree(project_root: Path) -> list[str]:
         files.append(path)
     return files
 
-def change_files_since_commit(project_root: Path, base_commit: str) -> list[str]:
+def changed_files_since_commit(project_root: Path, base_commit: str) -> list[str]:
     output = _run_git(["diff", "--name-only", base_commit, "HEAD"], cwd=project_root)
 
     return [line.strip() for line in output.splitlines() if line.strip()]
