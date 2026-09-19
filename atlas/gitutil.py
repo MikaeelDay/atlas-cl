@@ -39,3 +39,7 @@ def is_git_repo(project_root: Path) -> bool:
         return True
     except GitError:
         return False
+
+
+def current_commit(project_root: Path) -> str:
+    return _run_git(["rev-parse", "HEAD"], cwd=project_root).strip()
