@@ -18,3 +18,11 @@ def _init_repo(path: Path) -> None:
     _run(["init"], cwd=path)
     _run(["config", "user.email", "test@example.com"], cwd=path)
     _run(["config", "user.name", "Test User"], cwd=path)
+
+def test_is_git_repo_false_outside_repo(tmp_path: Path):
+    assert not is_git_repo(tmp_path)
+
+
+def test_is_git_repo_true_inside_repo(tmp_path: Path):
+    _init_repo(tmp_path)
+    assert is_git_repo(tmp_path)
