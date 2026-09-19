@@ -66,3 +66,16 @@ def test_changed_files_in_working_tree_empty_when_clean(tmp_path: Path):
 
     assert changed_files_in_working_tree(tmp_path) == []
 
+def test_changed_files_since_commit(tmp_path: Path):
+    _init_repo(tmp_path)
+    (tmp_path / "a.txt").write_text("hello")
+    _run(["add", "a.txt"], cwd=tmp_path)
+    _run(["commit", "-m", "first commit"], cwd=tmp_path)
+    first_commit = current_commit(tmp_path)
+
+    (tmp_path / "b.txt").write_text("second file")
+    _run(["add", "b.txt"], cwd=tmp_path)
+    _run(["commit", "-m", "second commit"], cwd=tmp_path)
+
+    changed = changed_files_since_commit(tmp_path, first_commit)
+    assert changed == ["b.txt"]
