@@ -17,3 +17,18 @@ from pathlib import Path
 
 class GitError(Exception):
     """Raised when a git command fails or the project isn't a git repo."""
+
+def _run_git(args: list[str], cwd: Path) -> str:
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError as e:
+        raise GitError("git is not installed or not on PATH") from e
+    except subprocess.CalledProcessError as e:
+        raise GitError(f"git {' '.join(args)} failed: {e.stderr.strip()}") from e
+    return result.stdout
