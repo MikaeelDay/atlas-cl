@@ -65,3 +65,4 @@ def test_changed_files_in_working_tree_empty_when_clean(tmp_path: Path):
     _run(["commit", "-m", "first commit"], cwd=tmp_path)
 
     assert changed_files_in_working_tree(tmp_path) == []
+
