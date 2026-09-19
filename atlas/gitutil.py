@@ -43,3 +43,14 @@ def is_git_repo(project_root: Path) -> bool:
 
 def current_commit(project_root: Path) -> str:
     return _run_git(["rev-parse", "HEAD"], cwd=project_root).strip()
+
+def changed_files_in_working_tree(project_root: Path) -> list[str]:
+    output = _run_git(["status", "--porcelain"], cwd=project_root)
+    files = []
+    for line in output.splitlines():
+        if not line.strip():
+            continue
+        # porcelain format: "XY path" where X/Y are status codes
+        path = line[3:].strip()
+        files.append(path)
+    return files
