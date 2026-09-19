@@ -32,3 +32,10 @@ def _run_git(args: list[str], cwd: Path) -> str:
     except subprocess.CalledProcessError as e:
         raise GitError(f"git {' '.join(args)} failed: {e.stderr.strip()}") from e
     return result.stdout
+
+def is_git_repo(project_root: Path) -> bool:
+    try:
+        _run_git(["rev-parse", "--is-inside-work-tree"], cwd=project_root)
+        return True
+    except GitError:
+        return False
