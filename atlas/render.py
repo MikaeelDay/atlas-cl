@@ -52,3 +52,14 @@ def render_mermaid(spec: Spec, state: State) -> str:
             lines.append(f"    {dep_id} --> {node.id}")
     lines.append("```")
     return "\n".join(lines)
+
+def render_checklist(spec: Spec, state: State) -> str:
+    lines = []
+    for node in _topological_order(spec):
+        marker = _status_marker(node, state)
+        box = "[x]" if marker == "+" else "[ ]"
+        suffix = " (ready to start)" if marker == "-" else ""
+        lines.append(f"- {box} **{node.name}**{suffix}")
+        if node.description:
+            lines.append(f"  {node.description}")
+    return "\n".join(lines)
