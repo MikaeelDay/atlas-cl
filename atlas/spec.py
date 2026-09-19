@@ -88,7 +88,8 @@ def _check_no_cycles(nodes: list[SpecNode]) -> None:
             visit(n_id, [n_id])
 
 
-def load_spec(path: Path) -> Spec:
+def load_spec(path: Path | str) -> Spec:
+    path = Path(path)
     if not path.exists():
         raise SpecError(f"Spec file not found: {path}")
     try:
